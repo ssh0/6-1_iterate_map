@@ -1,0 +1,246 @@
+\documentclass{jsarticle}
+\usepackage{moreverb}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{float}
+
+\title{計算機実習 問題6.1-周期倍化}
+\author{早稲田大学先進理工学部物理学科 B4 藤本將太郎}
+\date{2014/04/27}
+
+\begin{document}
+
+\maketitle
+
+\section{シミュレーションの目的}
+
+生物の個体数の時間発展は、その世代交代がある決まった季節に起こるなど、離散的であると見なせるため、これを記述するのには微分方程式よりもむしろ差分方程式の方が適している。世代(n+1)の個体数を世代nの個体数に関係づけ、その成長率が密度に依存しない一番簡単なモデルを考えると、世代nの個体数を$P_{n}$、成長率を$\alpha$(定数)として
+
+\begin{eqnarray}
+ P_{n+1}=\alpha P_{n}
+\end{eqnarray} 
+
+と書ける。これは大変簡単ではあるが、$\alpha > 1$のときに個体数が等比級数的に無限に増加してしまうことと、現実には個体数はその環境に制限されていることとから、現象を的確に表したモデルとは言えない。そこで次に、成長率が個体数が増加するにつれて線形に減少する場合
+
+\begin{eqnarray}
+ P_{n+1}=P_{n}(a-bP_{n})
+\end{eqnarray}
+
+を考える。このときこの式は$P_{n}$の2乗を含んでいるので、非線形の方程式となる。$P_{n}=(a/b)x_{n}$と置くことで個体数のスケールを変換し、
+
+\begin{eqnarray}
+ x_{n+1}=ax_{n}
+\end{eqnarray}
+
+として$P_{n}$を$x_{n}$に置き換えると、いろいろなパラメータを定義している単位系も変換される。ここでパラメータ$r=a/4$を導入して、再び書き直すと
+
+\begin{eqnarray}
+ x_{n+1}=f(x_{n})=4rx_{n}(1-x_{n})
+\label{eq:logistic}
+\end{eqnarray}
+
+となる。これは単一のパラメータ$r$のみでその動的な性質が決定されるという意味で望ましいモデルとなっている。ただし、$x_{n} > 1$のとき$x_{n+1}$は負になるので、このような非物理的性質が現れないように、xとrを区間$ 0 \leq x \leq 1 $、$ 0 \leq r \leq 1 $に制限することにする。\\
+式(4)で定義される関数$f$は1次元の写像であり、この形はロジスティック写像として知られているものである。ロジスティック写像は、系の未来の状態が決定論的に与えられるという意味で、単純な力学系の例である。本シミュレーションでは式(\ref{eq:logistic})の差分方程式を、世代ごとに計算を繰り返す方法で実際に求め、ロジスティック写像の動的な性質を調べることにする。
+
+\section{作成したプログラム}
+ロジスティック写像の性質を調べるために、Pythonを使用したプログラムを以下に示す。
+
+\listinginput{1}{_6-1_iterate_map.py}
+
+このプログラムは、追加のモジュールとして、グラフ描画に便利なmatplotlibを使用している。プログラムを実行すると各パラメータ\{x0, r, nmax\}(x0: xの初期値$x_{0}$、r: 制御パラメータ、nmax: 演算する世代数)の設定ダイアログが開き、OKボタンを押すことでその値で計算されたロジスティック写像のグラフが自動的に描画される。
+
+\section{実習課題}
+
+\begin{enumerate}
+ \renewcommand{\labelenumi}{\alph{enumi}.}
+ \renewcommand{\labelenumii}{}
+
+ \item $r=0.24$とおいてさまざまな初期値$x_{0}$について動的な振る舞いを調べよ。$x=0$が安定な固定点であることを示せ。$r$の値が十分に小さいときには、計算を反復して求めた$x$の値が、初期値$x_{0}$とは無関係に$x=0$に収束する。$x$が昆虫の個体数を表すと考えて、個体数の定性的な振る舞いについて調べよ。
+ 
+  \begin{enumerate}
+   \item $r=0.24$とおいて$x_{0}=0, 0.2, 0.4, 0.6, 0.8, 1.0 $とした時のグラフを図\ref{fig:f1}に示した。このグラフから確かめられるように、$r$の値が十分小さい時には、初期値によらず$x$の値は$x=0$に単調に収束する。$x$が昆虫の個体数を表すと見るなら、$r$の値が小さいということは、個体数の増加率が1よりも小さくなる状態を表しており、生まれてくる個体よりも死ぬ個体のほうが多い状態とも言えるだろう。そのような状況では、個体数は減り続け、いずれ0になる。
+   \begin{figure}[htbp]
+    \begin{center}
+    \includegraphics[width=14.0cm]{figure_1.pdf}
+    \caption{$r=0.24$とおいて$x_{0}=0, 0.2, 0.4, 0.6, 0.8, 1.0 $とした時のグラフ}
+    \label{fig:f1}
+    \end{center}
+    \end{figure}
+   \end{enumerate}
+  
+ \item 式(\ref{eq:logistic})の動的な性質を$r=0.26, 0.5, 0.74, 0.748$について調べよ。$r > 0.25$では$x=0$が不安定な固定点であることを確かめよ。与えられた$r$の値では、計算の反復で得られる$x$の値は初期値の過渡点を過ぎると変化しないこと、つまり、長時間後の動的な振る舞いは周期1であることを示せ。$r < 3/4$について区間$0 < x_{0} < 1$の$x_{0}$を初期値とするすべての軌跡が$x=1-1/4r$のアトラクタに近づくことが示されている。軌跡がアトラクタに吸い込まれる初期値の集合をそのアトラクタの吸引域と呼ぶ。ロジスティック写像では、領域$0 < x_{0} < 1$は$x=1-1/4r$のアトラクタの吸引域である。
+ 
+  \begin{enumerate}
+   \item $r=0.26, 0.5, 0.74, 0.748$とおいたとき、さまざまな$x_{0}$を初期値として設定しグラフを描いた。これらを図\ref{fig:f2}、図\ref{fig:f3}、図\ref{fig:f4}、図\ref{fig:f5}に示す。これらの結果から、この範囲の$r$では$x$の値は、振動しながら一定の値に収束していき、長時間後にはその動的な振る舞いが周期1であることがわかる。また、その時収束する値は$1-1/4r$と等しくなっていることがわかる。
+   \begin{figure}[H]
+   \begin{center}
+    \begin{tabular}{cc}
+    
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_2.pdf}
+	  \caption{$r=0.26$で$x_{0}=0.2, 0.4, 0.6, 0.8$とした時のグラフ}
+	  \label{fig:f2}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_3.pdf}
+	  \caption{$r=0.5$で$x_{0}=0.2, 0.4, 0.6, 0.8$とした時のグラフ}
+	  \label{fig:f3}
+	\end{center}
+      \end{minipage}
+      \\
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_4.pdf}
+	  \caption{$r=0.74$で$x_{0}=0.2, 0.4, 0.6, 0.8$とした時のグラフ}
+	  \label{fig:f4}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_5.pdf}
+	  \caption{$r=0.748$で$x_{0}=0.2, 0.8$とした時のグラフ}
+	  \label{fig:f5}
+	\end{center}
+      \end{minipage}
+    
+    \end{tabular}
+    \end{center}
+    \end{figure} 
+  \end{enumerate}
+  
+ \item $r=0.752, 0.76, 0.8, 0.862$について式(\ref{eq:logistic})の動的な性質を調べよ。$r$を0.75よりほんの少し大きくすると、初期値の過渡的な振る舞いの後に、2つの数値の間を振動することを示せ。つまり、単一の固定点に対応する周期1の安定なサイクルの代わりに、系は周期2の安定なサイクルを持つようになる。1つの固定点$x^{*}$が2つの$x_{1}^{*}$と$x_{2}^{*}$に分かれる。つまり、分岐する$r$の値は$r=b_{1}=3/4$である。1対の$x$($x_{1}^{*}$と$x_{2}^{*}$)は1つの、周期2の安定なアトラクタを形成する。
+ 
+  \begin{enumerate}
+   \item $r=0.752, 0.76, 0.8, 0.862$について$x_{0}$をさまざまに変えたときのグラフを図\ref{fig:f6}、図\ref{fig:f7}、図\ref{fig:f8}、図\ref{fig:f9}に示す。これらのグラフから見て取れるように、十分時間が経過した後も、$x$の値は一つの値に収束することなく、二つの値の間を周期2で振動していることがわかる。
+   
+   \begin{figure}[H]
+   \begin{center}
+    \begin{tabular}{cc}
+    
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_6.pdf}
+	  \caption{$r=0.752$で$x_{0}=0.2, 0.8$とした時のグラフ}
+	  \label{fig:f6}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_7.pdf}
+	  \caption{$r=0.76$で$x_{0}=0.2, 0.8$とした時のグラフ}
+	  \label{fig:f7}
+	\end{center}
+      \end{minipage}
+      \\
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_8.pdf}
+	  \caption{$r=0.8$で$x_{0}=0.2, 0.8$とした時のグラフ}
+	  \label{fig:f8}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_9.pdf}
+	  \caption{$r=0.862$で$x_{0}=0.2, 0.8$とした時のグラフ}
+	  \label{fig:f9}
+	\end{center}
+      \end{minipage}
+    
+    \end{tabular}
+    \end{center}
+    \end{figure}   
+  \end{enumerate}
+  
+ \item 設問cで観測したものと同様な動的振る舞いを示す、昆虫の個体数の生態学的なシナリオについて述べよ。
+ 
+  \begin{enumerate}
+   \item 設問cで観測されたような動的な振る舞いは、ある昆虫が、限られた環境の中で成長率が十分にあるために個体数が増えていき、しかし一方で個体数の増加による各種資源の枯渇など、成長率への負の影響のために、個体数を増やし続けることができず、次の世代ではその数が減少してしまうような場合であると考えることができる。
+  \end{enumerate}
+  
+ \item $r=0.863, 0.88$では、式(\ref{eq:logistic})の安定なアトラクタとその周期はどうなるか。
+ 
+  \begin{enumerate}
+   \item $r=0.863, 0.88$で$x_{0}=0.2$とした時のグラフを図\ref{fig:f10}、図\ref{fig:f11}に示す。これらのグラフを注意深く見ると、設問cのように周期2で振動しているのではなく、その二つのアトラクタがさらに二つのアトラクタに分岐していることがわかる。つまり、十分時間が経ったのちに、$x$は周期4で振動している。
+   \begin{figure}[H]
+   \begin{center}
+    \begin{tabular}{cc}
+    
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_10.pdf}
+	  \caption{$r=0.863$で$x_{0}=0.2$とした時のグラフ}
+	  \label{fig:f10}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_11.pdf}
+	  \caption{$r=0.88$で$x_{0}=0.2$とした時のグラフ}
+	  \label{fig:f11}
+	\end{center}
+      \end{minipage}
+     
+     \end{tabular}
+    \end{center}
+    \end{figure}
+  \end{enumerate}
+  
+ \item $r=0.89, 0.891, 0.8922$ではアトラクタとその周期はどうなるか。
+ 
+  \begin{enumerate}
+   \item $r=0.89, 0.891, 0.8922$で$x_{0}=0.2$とした時のグラフを図\ref{fig:f12}、図\ref{fig:f13}、図\ref{fig:f14}に示す。これらのグラフは、設問eでのアトラクタがそれぞれさらに二つのアトラクタに分岐しているものであることがわかる。つまり、十分時間が経ったのちに、$x$は周期8で振動している。以上の結果から、特に観測した$r$の領域については、$r$の値が増加するにつれて、アトラクタの数、または振動の周期が倍化していることがわかる。
+   \begin{figure}[H]
+   \begin{center}
+    \begin{tabular}{cc}
+    
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_12.pdf}
+	  \caption{$r=0.89$で$x_{0}=0.2$とした時のグラフ}
+	  \label{fig:f12}
+	\end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_13.pdf}
+	  \caption{$r=0.891$で$x_{0}=0.2$とした時のグラフ}
+	  \label{fig:f13}
+	\end{center}
+      \end{minipage}
+      
+      \\
+      
+      \begin{minipage}{0.5\hsize}
+	\begin{center}
+	  \includegraphics[width=8.5cm]{figure_14.pdf}
+	  \caption{$r=0.5$で$x_{0}=0.2, 0.4, 0.6, 0.8$とした時のグラフ}
+	  \label{fig:f14}
+	\end{center}
+      \end{minipage}
+      
+     
+     \end{tabular}
+    \end{center}
+    \end{figure}
+
+  \end{enumerate}
+  
+\end{enumerate}
+
+\section{まとめ}
+ロジスティック写像の性質である周期倍化を、コンピューターシミュレーションによって確認することができた。簡単なモデルから作られた古典的な方程式からカオス的な挙動が生まれることは興味深い。
+
+\section{参考文献}
+
+
+
+\end{document}
